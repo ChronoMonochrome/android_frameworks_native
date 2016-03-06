@@ -169,19 +169,25 @@ public:
         virtual void setDefaultState() = 0;
         virtual void setSkip(bool skip) = 0;
         virtual void setDim() = 0;
+#ifndef TARGET_NEEDS_HWC_V0
         virtual void setIsCursorLayerHint(bool isCursor = true) = 0;
+#endif
         virtual void setBlending(uint32_t blending) = 0;
         virtual void setTransform(uint32_t transform) = 0;
         virtual void setFrame(const Rect& frame) = 0;
         virtual void setCrop(const FloatRect& crop) = 0;
         virtual void setVisibleRegionScreen(const Region& reg) = 0;
         virtual void setSurfaceDamage(const Region& reg) = 0;
+#ifndef TARGET_NEEDS_HWC_V0
         virtual void setSidebandStream(const sp<NativeHandle>& stream) = 0;
+#endif
         virtual void setBuffer(const sp<GraphicBuffer>& buffer) = 0;
         virtual void setAcquireFenceFd(int fenceFd) = 0;
         virtual void setPlaneAlpha(uint8_t alpha) = 0;
         virtual void onDisplayed() = 0;
+#ifndef TARGET_NEEDS_HWC_V0
         virtual void setAnimating(bool animating)= 0;
+#endif
     };
 
     /*
