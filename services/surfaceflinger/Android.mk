@@ -127,7 +127,7 @@ endif
 
 LOCAL_MODULE := libsurfaceflinger
 
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Wunused -Wunreachable-code
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -160,7 +160,7 @@ ifdef TARGET_32_BIT_SURFACEFLINGER
 LOCAL_32_BIT_ONLY := true
 endif
 
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Wunused -Wunreachable-code
 
 include $(BUILD_EXECUTABLE)
 
@@ -184,7 +184,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE := libsurfaceflinger_ddmconnection
 
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Wunused -Wunreachable-code
 
 include $(BUILD_SHARED_LIBRARY)
 endif # libnativehelper
