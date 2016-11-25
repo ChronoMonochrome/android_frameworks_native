@@ -112,6 +112,10 @@ else
     LOCAL_CFLAGS += -DMAX_VIRTUAL_DISPLAY_DIMENSION=0
 endif
 
+ifeq ($(BOARD_CANT_USE_SCHED_FIFO),true)
+    LOCAL_CFLAGS += -DDISABLE_SCHED_FIFO
+endif
+
 LOCAL_CFLAGS += -fvisibility=hidden -Werror=format
 LOCAL_CFLAGS += -std=c++14
 

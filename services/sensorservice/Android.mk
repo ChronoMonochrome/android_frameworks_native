@@ -26,6 +26,10 @@ LOCAL_CFLAGS += -Wall -Werror -Wextra
 
 LOCAL_CFLAGS += -fvisibility=hidden
 
+ifeq ($(BOARD_CANT_USE_SCHED_FIFO),true)
+    LOCAL_CFLAGS += -DDISABLE_SCHED_FIFO
+endif
+
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libhardware \

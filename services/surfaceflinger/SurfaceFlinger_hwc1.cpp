@@ -485,6 +485,7 @@ void SurfaceFlinger::init() {
         mEventQueue.setEventThread(mEventThread);
     }
 
+#ifndef DISABLE_SCHED_FIFO
     // set SFEventThread to SCHED_FIFO to minimize jitter
     if (mSFEventThread != NULL) {
         struct sched_param param = {0};
@@ -493,6 +494,7 @@ void SurfaceFlinger::init() {
             ALOGE("Couldn't set SCHED_FIFO for SFEventThread");
         }
     }
+#endif
 
     // Initialize the H/W composer object.  There may or may not be an
     // actual hardware composer underneath.
@@ -2683,17 +2685,21 @@ void SurfaceFlinger::setPowerModeInternal(const sp<DisplayDevice>& hw,
         mHasPoweredOff = true;
         repaintEverything();
 
+#ifndef DISABLE_SCHED_FIFO
         struct sched_param param = {0};
         param.sched_priority = 1;
         if (sched_setscheduler(0, SCHED_FIFO, &param) != 0) {
             ALOGW("Couldn't set SCHED_FIFO on display on");
         }
+#endif
     } else if (mode == HWC_POWER_MODE_OFF) {
+#ifndef DISABLE_SCHED_FIFO
         // Turn off the display
         struct sched_param param = {0};
         if (sched_setscheduler(0, SCHED_OTHER, &param) != 0) {
             ALOGW("Couldn't set SCHED_OTHER on display off");
         }
+#endif
 
         if (type == DisplayDevice::DISPLAY_PRIMARY) {
             disableHardwareVsync(true); // also cancels any in-progress resync
