@@ -477,14 +477,19 @@ status_t BufferQueueProducer::dequeueBuffer(int *outSlot,
 
         eglDisplay = mSlots[found].mEglDisplay;
         eglFence = mSlots[found].mEglFence;
+#ifdef INVALID_BUFFER_SLOT_OFF
+        *outFence = mSlots[found].mFence;
+#else
         // Don't return a fence in shared buffer mode, except for the first
         // frame.
         *outFence = (mCore->mSharedBufferMode &&
                 mCore->mSharedBufferSlot == found) ?
                 Fence::NO_FENCE : mSlots[found].mFence;
+#endif
         mSlots[found].mEglFence = EGL_NO_SYNC_KHR;
         mSlots[found].mFence = Fence::NO_FENCE;
 
+#ifndef INVALID_BUFFER_SLOT_OFF
         // If shared buffer mode has just been enabled, cache the slot of the
         // first buffer that is dequeued and mark it as the shared buffer.
         if (mCore->mSharedBufferMode && mCore->mSharedBufferSlot ==
@@ -492,6 +497,7 @@ status_t BufferQueueProducer::dequeueBuffer(int *outSlot,
             mCore->mSharedBufferSlot = found;
             mSlots[found].mBufferState.mShared = true;
         }
+#endif
     } // Autolock scope
 
     if (returnFlags & BUFFER_NEEDS_REALLOCATION) {
@@ -503,7 +509,6 @@ status_t BufferQueueProducer::dequeueBuffer(int *outSlot,
             Mutex::Autolock lock(mCore->mMutex);
 
             if (graphicBuffer != NULL && !mCore->mIsAbandoned) {
-                graphicBuffer->setGenerationNumber(mCore->mGenerationNumber);
                 mSlots[*outSlot].mGraphicBuffer = graphicBuffer;
             }
 
@@ -511,15 +516,19 @@ status_t BufferQueueProducer::dequeueBuffer(int *outSlot,
             mCore->mIsAllocatingCondition.broadcast();
 
             if (graphicBuffer == NULL) {
+#ifndef BUFFER_ALLOCAT_OFF
                 mCore->mFreeSlots.insert(*outSlot);
                 mCore->clearBufferSlotLocked(*outSlot);
+#endif
                 BQ_LOGE("dequeueBuffer: createGraphicBuffer failed");
                 return error;
             }
 
             if (mCore->mIsAbandoned) {
+#ifndef BUFFER_ALLOCAT_OFF
                 mCore->mFreeSlots.insert(*outSlot);
                 mCore->clearBufferSlotLocked(*outSlot);
+#endif
                 BQ_LOGE("dequeueBuffer: BufferQueue has been abandoned");
                 return NO_INIT;
             }
@@ -688,14 +697,14 @@ status_t BufferQueueProducer::attachBuffer(int* outSlot,
         return BAD_VALUE;
     }
 
+    mCore->waitWhileAllocatingLocked();
+
     if (buffer->getGenerationNumber() != mCore->mGenerationNumber) {
         BQ_LOGE("attachBuffer: generation number mismatch [buffer %u] "
                 "[queue %u]", buffer->getGenerationNumber(),
                 mCore->mGenerationNumber);
         return BAD_VALUE;
     }
-
-    mCore->waitWhileAllocatingLocked();
 
     status_t returnFlags = NO_ERROR;
     int found;
@@ -791,6 +800,7 @@ status_t BufferQueueProducer::queueBuffer(int slot,
             return BAD_VALUE;
         }
 
+#ifndef INVALID_BUFFER_SLOT_OFF
         // If shared buffer mode has just been enabled, cache the slot of the
         // first buffer that is queued and mark it as the shared buffer.
         if (mCore->mSharedBufferMode && mCore->mSharedBufferSlot ==
@@ -798,6 +808,7 @@ status_t BufferQueueProducer::queueBuffer(int slot,
             mCore->mSharedBufferSlot = slot;
             mSlots[slot].mBufferState.mShared = true;
         }
+#endif
 
         BQ_LOGV("queueBuffer: slot=%d/%" PRIu64 " time=%" PRIu64 " dataSpace=%d"
                 " crop=[%d,%d,%d,%d] transform=%#x scale=%s",
